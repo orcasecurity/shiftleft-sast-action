@@ -2,7 +2,7 @@ const yaml = require("js-yaml");
 const fs = require("fs");
 const path = require("path");
 const os = require("node:os");
-const { execSync } = require("child_process");
+const { execSync, spawnSync } = require("child_process");
 
 describe("GitHub Action Tests", () => {
   describe("Action Configuration Validation", () => {
@@ -17,8 +17,20 @@ describe("GitHub Action Tests", () => {
 
     test("action.yml structure matches entrypoint.sh usage", () => {
       Object.keys(actionConfig.inputs).forEach((input) => {
-        const envVar = `\${INPUT_${input.toUpperCase()}\}`;
+        const envVar = `\${INPUT_${input.toUpperCase()}}`;
         expect(entrypointContent).toContain(envVar);
+      });
+    });
+
+    test("boolean inputs are only set when true", () => {
+      const booleanInputs = Object.entries(actionConfig.inputs).filter(
+        ([_, input]) => input.default === "true" || input.default === "false",
+      );
+      booleanInputs.forEach(([inputName]) => {
+        const inputVarName = `INPUT_${inputName.toUpperCase()}`;
+        expect(entrypointContent).toMatch(
+          new RegExp(`\\[ "\\$\\{${inputVarName}}"\\s+=+\\s+"(true|false)"`),
+        );
       });
     });
 
@@ -35,9 +47,8 @@ describe("GitHub Action Tests", () => {
 
   describe("Entrypoint execution", () => {
     let originalEnv;
-    const testFilesPath = path.join(os.tmpdir(), "shiftleft-sast-action-tests");
+    const testFilesPath = path.join(os.tmpdir(), "shiftleft-action-tests");
     const testWorkspace = path.join(testFilesPath, "test-workspace");
-    const testResultsPath = path.join(testFilesPath, "results/");
     const mockOrcaPath = path.join(testFilesPath, "mock-orca-cli");
     const testEntrypoint = path.join(testFilesPath, "test-entrypoint.sh");
     const githubOutput = path.join(testFilesPath, "github_output");
@@ -48,10 +59,6 @@ describe("GitHub Action Tests", () => {
 
       // Create mock orca-cli script
       fs.writeFileSync(mockOrcaPath, fs.readFileSync("./test/mock-orca-cli"), {
-        mode: 0o755,
-      });
-      fs.mkdirSync(testResultsPath, { recursive: true });
-      fs.writeFileSync(path.join(testResultsPath, "/sast.json"), "", {
         mode: 0o755,
       });
 
@@ -76,9 +83,6 @@ describe("GitHub Action Tests", () => {
     afterEach(() => {
       process.env = originalEnv;
       jest.clearAllMocks();
-      if (fs.existsSync(testResultsPath)) {
-        fs.rmSync(testResultsPath, { recursive: true, force: true });
-      }
     });
 
     afterAll(() => {
@@ -97,7 +101,7 @@ describe("GitHub Action Tests", () => {
         disable_err_report: { value: "true" },
         exclude_paths: { value: "test,temp" },
         format: { value: "json" },
-        output: { value: testResultsPath },
+        output: { value: "results/" },
         console_output: { value: "test-console_output", delimiter: "=" },
         timeout: { value: "1h" },
         preview_lines: { value: "5" },
@@ -144,7 +148,7 @@ describe("GitHub Action Tests", () => {
         format: { value: "test-format" },
       };
       let results = executeEntrypoint(testInputs);
-      expect(results.toString()).toContain("--format test-format,json ");
+      expect(results).toContain("--format test-format,json ");
     });
 
     test("preserves json format when already specified", () => {
@@ -153,71 +157,54 @@ describe("GitHub Action Tests", () => {
         format: { value: "test-format,json" },
       };
       let results = executeEntrypoint(testInputs);
-      expect(results.toString()).toContain("--format test-format,json ");
+      expect(results).toContain("--format test-format,json ");
     });
 
     test("sets default format to cli,json when no format specified", () => {
       const testInputs = mockRequiredInputs();
       let results = executeEntrypoint(testInputs);
-      expect(results.toString()).toContain("--format cli,json ");
+      expect(results).toContain("--format cli,json ");
     });
 
     test("handles output directory without format", () => {
       const testInputs = {
         ...mockRequiredInputs(),
-        output: { value: testResultsPath },
+        output: { value: "results/" },
       };
       const results = executeEntrypoint(testInputs);
-      expect(results.toString()).toContain("--format cli,json");
-      expect(results.toString()).toContain(`--output ${testResultsPath}`);
+      expect(results).toContain("--format cli,json");
+      expect(results).toContain(`--output ${testInputs.output.value}`);
     });
 
-    describe("Error Handling", () => {
-      test.each([
-        ["path", "Path must be provided"],
-        ["api_token", "api_token must be provided"],
-        ["project_key", "project_key must be provided"],
-      ])("validates required input %s", (input, errorMessage) => {
-        const testInputs = mockRequiredInputs();
-        delete testInputs[input];
+    test.each([
+      ["path", "Path must be provided"],
+      ["api_token", "api_token must be provided"],
+      ["project_key", "project_key must be provided"],
+    ])("validates required input %s", (input, errorMessage) => {
+      const testInputs = mockRequiredInputs();
+      delete testInputs[input];
 
-        try {
-          executeEntrypoint(testInputs);
-          fail("Expected error was not thrown");
-        } catch (error) {
-          expect(error.stdout.toString()).toContain(errorMessage);
-        }
-      });
+      expect(() => executeEntrypoint(testInputs)).toThrow(errorMessage);
+    });
 
-      test("validates path input format", () => {
-        const testInputs = {
-          ...mockRequiredInputs(),
-          path: { value: "/absolute/path" },
-        };
-        try {
-          executeEntrypoint(testInputs);
-          fail("Expected error was not thrown");
-        } catch (error) {
-          expect(error.stdout.toString()).toContain(
-            "ERROR: Path shouldn't be absolute.",
-          );
-        }
-      });
+    test("validates path input format", () => {
+      const testInputs = {
+        ...mockRequiredInputs(),
+        path: { value: "/absolute/path" },
+      };
+      expect(() => executeEntrypoint(testInputs)).toThrow(
+        /Path shouldn't be absolute./,
+      );
+    });
 
-      test("validates output directory format", () => {
-        const testInputs = {
-          ...mockRequiredInputs(),
-          output: { value: "results" },
-        };
-        try {
-          executeEntrypoint(testInputs);
-          fail("Expected error was not thrown");
-        } catch (error) {
-          expect(error.stdout.toString()).toContain(
-            "Output must be a folder (end with /)",
-          );
-        }
-      });
+    test("validates output directory format", () => {
+      const testInputs = {
+        ...mockRequiredInputs(),
+        output: { value: "results" },
+      };
+      expect(() => executeEntrypoint(testInputs)).toThrow(
+        /Output must be a folder \(end with \/\)/,
+      );
     });
 
     function mockRequiredInputs() {
@@ -237,14 +224,24 @@ describe("GitHub Action Tests", () => {
 
     function executeEntrypoint(testInputs) {
       setupEnvVars(testInputs);
-      return execSync(testEntrypoint, {
+
+      const result = spawnSync(testEntrypoint, {
         env: process.env,
-        stderr: "pipe",
+        stdio: "pipe",
+        shell: false,
       });
+
+      if (result.error) {
+        throw result.error;
+      }
+      if (result.status !== 0) {
+        throw new Error(result.stdout.toString());
+      }
+      return result.stdout.toString();
     }
 
     function extractOrcaCliArgs(result) {
-      const matches = result.toString().match(/mock-orca-cli (.*)/);
+      const matches = result.match(/mock-orca-cli (.*)/);
       return matches ? matches[1] : "";
     }
   });
