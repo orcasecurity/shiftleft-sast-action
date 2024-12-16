@@ -34,7 +34,7 @@ function wrapWords(input, maxLineLength = 80) {
 
 function extractAnnotations(results) {
   let annotations = [];
-  for (const controlResults of results || []) {
+  for (const controlResults of results.results || []) {
     for (const finding of controlResults["findings"]) {
       const catalogControl = controlResults["catalog_control"];
       annotations.push({
