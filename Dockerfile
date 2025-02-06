@@ -9,7 +9,7 @@ RUN apk --no-cache --update add python3 py3-pip py3-virtualenv gcc musl-dev pyth
 
 FROM ghcr.io/orcasecurity/orca-cli:1
 
-RUN apk --no-cache --update add bash nodejs npm python3
+RUN apk --no-cache --update add bash nodejs npm python3 sqlite sqlite-dev
 
 # Copy ONLY the virtual environment from the build stage, not the build tools
 COPY --from=builder /opt/venv /opt/venv
