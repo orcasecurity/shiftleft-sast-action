@@ -10,6 +10,7 @@ exit_with_err() {
 
 function run_orca_sast_scan() {
   cd "${GITHUB_WORKSPACE}" || exit_with_err "could not find GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
+  git config --global --add safe.directory "$PWD"
   echo "Running Orca SAST scan:"
   echo orca-cli "${GLOBAL_FLAGS[@]}" sast scan "${SCAN_FLAGS[@]}"
   orca-cli "${GLOBAL_FLAGS[@]}" sast scan "${SCAN_FLAGS[@]}"
