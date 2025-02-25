@@ -38,7 +38,9 @@ jobs:
       # Checkout your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Repository
         uses: actions/checkout@v4
-
+        with:
+          # Important for pull request diff-awareness report
+          fetch-depth: 0
       - name: Run Orca SAST Scan
         uses: orcasecurity/shiftleft-sast-action@v1
         with:
