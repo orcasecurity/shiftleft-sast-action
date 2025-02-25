@@ -1,6 +1,6 @@
 FROM alpine:3 AS builder
 
-ARG SEMGREP_VERSION=1.97.0
+ARG SEMGREP_VERSION=1.109.0
 
 RUN apk --no-cache --update add python3 py3-pip py3-virtualenv gcc musl-dev python3-dev && \
     python3 -m venv /opt/venv && \
