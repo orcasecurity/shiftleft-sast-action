@@ -8,7 +8,28 @@ function getDetail(control) {
     recommendation = wrapWords(recommendation);
     message = `${message}\n\nRecommendation:\n${recommendation}`;
   }
+
+  const sastParams = getSastParams(control);
+  if (sastParams) {
+    message = `${message}\n\n${sastParams}`;
+  }
+
   return message;
+}
+
+function getSastParams(control) {
+  const { impact, likelihood, confidence } = control;
+
+  const messages = [];
+  impact && messages.push(`Impact: ${impact}`);
+  likelihood && messages.push(`Likelihood: ${likelihood}`);
+  confidence && messages.push(`Confidence: ${confidence}`);
+
+  if (messages.length === 0) {
+    return undefined;
+  }
+
+  return messages.join(" | ");
 }
 
 function wrapWords(input, maxLineLength = 80) {
