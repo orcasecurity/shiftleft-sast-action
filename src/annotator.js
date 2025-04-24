@@ -25,11 +25,11 @@ function getSastParams(control) {
   likelihood && messages.push(`Likelihood: ${likelihood}`);
   confidence && messages.push(`Confidence: ${confidence}`);
 
-  if(messages.length === 0) {
+  if (messages.length === 0) {
     return undefined;
   }
 
-  return messages.join(' | ');
+  return messages.join(" | ");
 }
 
 function wrapWords(input, maxLineLength = 80) {
