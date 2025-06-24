@@ -138,7 +138,7 @@ describe("GitHub Action Tests", () => {
       const result = executeEntrypoint(testInputs);
       let cliArgs = extractOrcaCliArgs(result);
       expect(cliArgs).toEqual(
-        `--project-key ${testInputs.project_key.value} sast scan --path ${testInputs.path.value} --format cli,json --output orca_results/ --console-output=cli`,
+        `--project-key ${testInputs.project_key.value} sast scan --path ${testInputs.path.value} --format cli,json --output orca_results/ --console-output=cli --containerized-mode`,
       );
     });
 
