@@ -72,6 +72,9 @@ inputs:
   log_path:
     description: "The directory path to specify where the logs should be written to on debug mode. Default to the current working directory"
     required: false
+  custom_sast_controls:
+    description: "path to custom sast controls directory"
+    required: false
 
 outputs:
   exit_code:

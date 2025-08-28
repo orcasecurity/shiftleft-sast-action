@@ -49,6 +49,9 @@ function set_global_flags() {
   if [ "${INPUT_LOG_PATH}" ]; then
     GLOBAL_FLAGS+=(--log-path "${INPUT_LOG_PATH}")
   fi
+  if [ "${INPUT_CUSTOM_SAST_CONTROLS}" ]; then
+    GLOBAL_FLAGS+=(--custom-sast-controls "${INPUT_CUSTOM_SAST_CONTROLS}")
+  fi
 }
 
 # Json format must be reported and be stored in a file for github annotations
