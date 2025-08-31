@@ -71,6 +71,7 @@ jobs:
 | display_name     | custom-display-name            | Scan log display name (on Orca platform)                                          | String  | No       | N/A               |
 | debug            | true                           | Debug mode                                                                        | Boolean | No       | false             |
 | log_path         | results/                       | The directory path to specify where the logs should be written to on debug mode.  | String  | No       | working directory |
+| custom_sast_controls | custom_control/ | Path to custom SAST controls **directory** | String | No | N/A |
 
 ## Annotations
 
