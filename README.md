@@ -7,10 +7,14 @@ for [Orca Shift Left Security](https://orca.security/solutions/shift-left-securi
 
 ## Table of Contents
 
-- [Usage](#usage)
-  - [Workflow](#workflow)
-  - [Inputs](#inputs)
-- [Annotations](#annotations)
+- [Orca Shift Left Security Action](#orca-shift-left-security-action)
+      - [More info can be found in the official Orca Shift Left Security documentation](#more-info-can-be-found-in-the-official-orca-shift-left-security-documentation)
+  - [Table of Contents](#table-of-contents)
+  - [Usage](#usage)
+    - [Workflow](#workflow)
+    - [Inputs](#inputs)
+  - [Annotations](#annotations)
+  - [Upload SARIF report](#upload-sarif-report)
 
 ## Usage
 
@@ -72,6 +76,7 @@ jobs:
 | debug                | true                           | Debug mode                                                                        | Boolean | No       | false             |
 | log_path             | results/                       | The directory path to specify where the logs should be written to on debug mode.  | String  | No       | working directory |
 | custom_sast_controls | custom_control/                | Path to custom SAST controls **directory**                                        | String  | No       | N/A               |
+| use_opengrep         | true                           | Use Opengrep instead of Semgrep for scanning                                      | Boolean | No       | true              |
 
 ## Annotations
 
@@ -80,3 +85,46 @@ After scanning, the action will add the results as annotations in a pull request
 ![](/assets/annotations_preview.png)
 
 > **NOTE:** Annotations can be disabled by setting the "show_annotation" input to "false"
+
+## Upload SARIF report
+
+If you have [GitHub code scanning](https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/about-code-scanning) available you can use Orca Shift Left Security as a scanning tool
+
+> **NOTE:** Code scanning is available for all public repositories. Code scanning is also available in private repositories owned by organizations that use GitHub Enterprise Cloud and have a license for GitHub Advanced Security.
+
+Configuration:
+
+```yaml
+name: Scan and upload SARIF
+
+push:
+  branches:
+    - main
+
+jobs:
+  orca-sast_scan:
+    name: Orca SAST Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    env:
+      PROJECT_KEY: <project key> # Set the desired project to run the cli scanning with
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Orca SAST Scan
+        id: orcasecurity_sast_scan
+        uses: orcasecurity/shiftleft-sast-action@v1
+        with:
+          api_token: ${{ secrets.ORCA_SECURITY_API_TOKEN }}
+          project_key: ${{ env.PROJECT_KEY }}
+          path: <path to scan>
+          format: "sarif"
+          output: "results/"
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        if: ${{ always() && steps.orcasecurity_sast_scan.outputs.exit_code != 1 }}
+        with:
+          sarif_file: results/sast.sarif
+```
