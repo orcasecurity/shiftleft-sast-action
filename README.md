@@ -75,7 +75,6 @@ jobs:
 | debug                | true                           | Debug mode                                                                        | Boolean | No       | false             |
 | log_path             | results/                       | The directory path to specify where the logs should be written to on debug mode.  | String  | No       | working directory |
 | custom_sast_controls | custom_control/                | Path to custom SAST controls **directory**                                        | String  | No       | N/A               |
-| use_opengrep         | true                           | Use Opengrep instead of Semgrep for scanning                                      | Boolean | No       | true              |
 
 ## Annotations
 
