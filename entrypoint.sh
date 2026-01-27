@@ -107,6 +107,9 @@ function set_sast_scan_flags() {
   if [ "${INPUT_MAX_FILE_SIZE}" ]; then
     SCAN_FLAGS+=(--max-file-size "${INPUT_MAX_FILE_SIZE}")
   fi
+  if [ "${INPUT_STRICT_MODE}" == "true" ]; then
+    SCAN_FLAGS+=(--strict-mode)
+  fi
 }
 
 function set_env_vars() {

@@ -75,6 +75,10 @@ inputs:
   custom_sast_controls:
     description: "path to custom sast controls directory"
     required: false
+  strict_mode:
+    description: "fail immediately if any SAST custom controls fail validation"
+    required: false
+    default: "false"
 
 outputs:
   exit_code:
