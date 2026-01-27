@@ -52,6 +52,9 @@ function set_global_flags() {
   if [ "${INPUT_CUSTOM_SAST_CONTROLS}" ]; then
     GLOBAL_FLAGS+=(--custom-sast-controls "${INPUT_CUSTOM_SAST_CONTROLS}")
   fi
+  if [ "${INPUT_STRICT_MODE}" == "true" ]; then
+    GLOBAL_FLAGS+=(--strict-mode)
+  fi
 }
 
 # Json format must be reported and be stored in a file for github annotations
