@@ -1,7 +1,7 @@
 const core = require("@actions/core");
 
-function getDetail(control) {
-  let details = wrapWords(control["details"]);
+function getDetail(control, finding) {
+  let details = wrapWords(finding["description"]);
   let message = `Details:\n${details}`;
   let recommendation = control["recommendation"];
   if (recommendation) {
