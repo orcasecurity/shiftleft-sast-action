@@ -79,6 +79,10 @@ inputs:
     description: "fail immediately if any SAST custom controls fail validation"
     required: false
     default: "false"
+  taint_intrafile:
+    description: "follow taint through function calls within the same file, so dataflow traces include the called function names"
+    required: false
+    default: "false"
 
 outputs:
   exit_code:
