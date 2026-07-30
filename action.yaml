@@ -80,7 +80,7 @@ inputs:
     required: false
     default: "false"
   taint_intrafile:
-    description: "follow taint through function calls within the same file, so dataflow traces include the called function names"
+    description: "Enable cross-function taint analysis within each file."
     required: false
     default: "false"
 
