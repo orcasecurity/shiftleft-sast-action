@@ -57,7 +57,7 @@ jobs:
 ### Inputs
 
 | Variable             | Example Value &nbsp;           | Description &nbsp;                                                                | Type    | Required | Default           |
-| -------------------- | ------------------------------ |-----------------------------------------------------------------------------------| ------- | -------- | ----------------- |
+| -------------------- | ------------------------------ | --------------------------------------------------------------------------------- | ------- | -------- | ----------------- |
 | api_token            |                                | Orca API Token used for Authentication                                            | String  | Yes      | N/A               |
 | project_key          | my-project-key                 | Project Key name                                                                  | String  | Yes      | N/A               |
 | path                 | src/main/java,mt-dir/          | Paths or directories to scan (comma-separated)                                    | String  | Yes      | N/A               |
