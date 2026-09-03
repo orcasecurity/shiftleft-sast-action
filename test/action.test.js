@@ -110,7 +110,6 @@ describe("GitHub Action Tests", () => {
         display_name: { value: "test-display-name" },
         debug: { value: "true" },
         log_path: { value: "/logs" },
-        taint_intrafile: { value: "true" },
       };
       const results = executeEntrypoint(testInputs);
       const orcaCliArgs = extractOrcaCliArgs(results);
