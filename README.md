@@ -76,7 +76,6 @@ jobs:
 | log_path             | results/                       | The directory path to specify where the logs should be written to on debug mode.  | String  | No       | working directory |
 | custom_sast_controls | custom_control/                | Path to custom SAST controls **directory**                                        | String  | No       | N/A               |
 | strict_mode          | true                           | Fail immediately if any SAST custom controls fail validation                      | Boolean | No       | false             |
-| taint_intrafile      | true                           | Enable cross-function taint analysis within each file.                            | Boolean | No       | false             |
 
 ## Annotations
 
