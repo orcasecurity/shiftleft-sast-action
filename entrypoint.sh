@@ -110,6 +110,9 @@ function set_sast_scan_flags() {
   if [ "${INPUT_STRICT_MODE}" == "true" ]; then
     SCAN_FLAGS+=(--strict-mode)
   fi
+  if [ "${INPUT_DISABLE_TAINT_INTRAFILE}" == "true" ]; then
+    SCAN_FLAGS+=(--disable-taint-intrafile)
+  fi
 }
 
 function set_env_vars() {
