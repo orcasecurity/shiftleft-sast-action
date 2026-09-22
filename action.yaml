@@ -79,6 +79,10 @@ inputs:
     description: "fail immediately if any SAST custom controls fail validation"
     required: false
     default: "false"
+  disable_taint_intrafile:
+    description: "disable dataflow analysis across functions within a file (on by default)"
+    required: false
+    default: "false"
 
 outputs:
   exit_code:
