@@ -8,6 +8,7 @@ RUN apk --no-cache --update add python3 py3-pip py3-virtualenv gcc musl-dev pyth
     python3 -m pip install --no-cache-dir semgrep=="$SEMGREP_VERSION"
 
 FROM ghcr.io/orcasecurity/orca-cli:1
+USER root
 
 RUN apk --no-cache --update add bash nodejs npm python3 sqlite sqlite-dev
 
@@ -28,4 +29,5 @@ WORKDIR /
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+USER orca
 ENTRYPOINT ["/entrypoint.sh"]
