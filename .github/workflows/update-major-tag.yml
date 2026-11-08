@@ -46,7 +46,7 @@ jobs:
             TAG="$(gh release view --json tagName --jq .tagName)"
           fi
           if ! printf '%s' "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
-            echo "::notice::'$TAG' is not a vMAJOR.MINOR.PATCH release tag, skipping."
+            echo "::warning::'$TAG' is not a vMAJOR.MINOR.PATCH release tag, skipping. The major tag was NOT moved."
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
