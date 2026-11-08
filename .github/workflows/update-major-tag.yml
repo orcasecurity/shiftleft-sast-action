@@ -1,0 +1,59 @@
+name: Update Major Version Tag
+
+# Keeps the floating major tag (e.g. v1) pointing at the newest v1.x.y release,
+# so consumers pinned to `orcasecurity/shiftleft-sast-action@v1` pick up patches.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to point the major tag at (e.g. v1.0.14). Defaults to the latest release."
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  update-major-tag:
+    if: github.event_name == 'workflow_dispatch' || github.event.release.prerelease == false
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release tag
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          TAG="${EVENT_TAG:-${INPUT_TAG:-}}"
+          if [ -z "$TAG" ]; then
+            TAG="$(gh release view --json tagName --jq .tagName)"
+          fi
+          if ! printf '%s' "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::notice::'$TAG' is not a vMAJOR.MINOR.PATCH release tag, skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "major=${TAG%%.*}" >> "$GITHUB_OUTPUT"
+
+      - name: Move major tag
+        if: steps.resolve.outputs.skip != 'true'
+        env:
+          TAG: ${{ steps.resolve.outputs.tag }}
+          MAJOR: ${{ steps.resolve.outputs.major }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -fa "$MAJOR" -m "Update $MAJOR to $TAG" "$TAG^{commit}"
+          git push origin "refs/tags/$MAJOR" --force
+          echo "::notice::$MAJOR now points at $TAG ($(git rev-parse --short "$TAG^{commit}"))"
